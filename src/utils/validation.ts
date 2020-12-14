@@ -15,6 +15,15 @@ export enum SwapValidation {
     NO_SWAPS,
 }
 
+export enum PoolValidation {
+    NONE,
+    EMPTY_INPUT,
+    INVALID_INPUT,
+    NO_ACCOUNT,
+    WRONG_NETWORK,
+    INSUFFICIENT_BALANCE,
+}
+
 export function validateNumberInput(input: string): ValidationError {
     if (!input) {
         return ValidationError.EMPTY;

@@ -5,6 +5,7 @@ import { Wallet } from '@ethersproject/wallet';
 
 import config from '@/config';
 import provider from '@/utils/provider';
+import { PoolMetadata } from '@/store/modules/pools';
 
 export const ETH_KEY = 'ether';
 
@@ -80,6 +81,26 @@ export function getPoolLink(pool: string): string {
     const prefix = prefixMap[chainId];
     const link = `https://${prefix}pools.balancer.exchange/#/pool/${pool}`;
     return link;
+}
+
+export function getPoolName(pool: PoolMetadata): string {
+    if (!pool) {
+        return 'Balancer Pool';
+    }
+    const totalWeight = pool.totalWeight;
+    return pool.assets
+        .sort((a, b) => {
+            if (a.weight.eq(b.weight)) {
+                return 0;
+            }
+            return a.weight.lt(b.weight) ? -1 : 1;
+
+        })
+        .reduce((name, asset) => {
+            const share = asset.weight.div(totalWeight);
+            const percentageString = `${(share.toNumber() * 100).toFixed(0)}%`;
+            return name + `${percentageString} ${asset.symbol} `;
+        }, '');
 }
 
 export function getTrustwalletLink(address: string): string {

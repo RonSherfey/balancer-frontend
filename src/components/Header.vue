@@ -9,14 +9,15 @@
                 <span class="title">Balancer</span>
             </div>
         </router-link>
+        <div class="nav">
+            <router-link :to="{ name: 'swap' }">
+                Swap
+            </router-link>
+            <router-link :to="{ name: 'pool' }">
+                Pool
+            </router-link>
+        </div>
         <div class="header-right">
-            <a
-                class="link"
-                href="https://pools.balancer.exchange"
-                target="_blank"
-            >
-                Add Liquidity
-            </a>
             <Account class="account" />
         </div>
     </div>
@@ -55,11 +56,6 @@ export default defineComponent({
 
 .header-right {
     display: flex;
-    align-items: center;
-}
-
-.link {
-    margin-right: 8px;
 }
 
 a {
@@ -81,6 +77,14 @@ a {
 .title {
     margin-left: 16px;
     font-size: 20px;
+}
+
+.nav > a:not(:first-child) {
+    margin-left: 8px;
+}
+
+.nav > a.router-link-active {
+    text-decoration: underline;
 }
 
 .account {

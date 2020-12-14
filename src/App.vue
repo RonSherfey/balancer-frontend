@@ -42,6 +42,7 @@ export default defineComponent({
         const notifications = computed(() => store.state.ui.notifications);
 
         onMounted(() => {
+            store.dispatch('pools/init');
             store.dispatch('assets/init');
             store.dispatch('account/init');
         });

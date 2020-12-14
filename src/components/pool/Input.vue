@@ -1,22 +1,15 @@
 <template>
-    <div class="asset-input">
+    <div class="pool-input">
         <div
-            class="asset-wrapper"
-            :class="{ readonly: isReadonly }"
-            @click="openModal"
+            class="pool-wrapper"
         >
-            <div class="asset-meta">
-                <AssetIcon
-                    class="asset-icon"
+            <div class="pool-meta">
+                <PoolIcon
+                    class="pool-icon"
                     :address="address"
                 />
-                <span class="asset-symbol">{{ symbol }}</span>
+                <span class="pool-symbol">{{ symbol }}</span>
             </div>
-            <Icon
-                v-if="!isReadonly"
-                class="chevron-icon"
-                :title="'chevron'"
-            />
         </div>
         <div class="amount-wrapper">
             <div class="amount">
@@ -62,9 +55,8 @@ import { useStore } from 'vuex';
 import { RootState } from '@/store';
 import { ETH_KEY, scale } from '@/utils/helpers';
 
-import AssetIcon from '@/components/AssetIcon.vue';
 import ButtonText from '@/components/ButtonText.vue';
-import Icon from '@/components/Icon.vue';
+import PoolIcon from '@/components/pool/Icon.vue';
 
 export interface Label {
     text: string;
@@ -79,15 +71,10 @@ export enum LabelStyle {
 
 export default defineComponent({
     components: {
-        AssetIcon,
         ButtonText,
-        Icon,
+        PoolIcon,
     },
     props: {
-        modalKey: {
-            type: String,
-            required: true,
-        },
         address: {
             type: String,
             required: true,
@@ -113,20 +100,16 @@ export default defineComponent({
         const store = useStore<RootState>();
 
         const symbol = computed(() => {
-            const assets = store.getters['assets/metadata'];
-            const asset = assets[props.address];
-            if (!asset) {
+            const pools = store.state.pools.metadata;
+            const pool = pools[props.address];
+            if (!pool) {
                 return '';
             }
-            return asset.symbol;
+            // return pool.symbol;
+            return 'BPT';
         });
 
-        const isReadonly = computed(() => props.modalKey === '');
-
         const isMaxLabelShown = computed(() => {
-            if (props.modalKey === 'output') {
-                return false;
-            }
             if (props.address === ETH_KEY) {
                 return false;
             }
@@ -159,14 +142,13 @@ export default defineComponent({
         }
 
         function openModal(): void {
-            store.dispatch('ui/openAssetModal', props.modalKey);
+            store.dispatch('ui/openPoolModal');
         }
 
         return {
             LabelStyle,
 
             symbol,
-            isReadonly,
             isMaxLabelShown,
             setMax,
             handleInputChange,
@@ -177,7 +159,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.asset-input {
+.pool-input {
     display: flex;
     height: 58px;
     border: 1px solid var(--border-input);
@@ -185,7 +167,7 @@ export default defineComponent({
     background: var(--background-secondary);
 }
 
-.asset-wrapper {
+.pool-wrapper {
     width: 140px;
     display: flex;
     align-items: center;
@@ -194,30 +176,19 @@ export default defineComponent({
     cursor: pointer;
 }
 
-.asset-wrapper.readonly:hover {
-    background: var(--background-secondary);
-}
-
-.asset-wrapper:hover {
-    background: var(--background-hover);
-    border-radius: var(--border-radius-medium);
-    border-bottom-right-radius: 0;
-    border-top-right-radius: 0;
-}
-
-.asset-meta {
+.pool-meta {
     display: flex;
     align-items: center;
 }
 
-.asset-icon {
+.pool-icon {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     margin-left: 10px;
 }
 
-.asset-symbol {
+.pool-symbol {
     max-width: 68px;
     margin-left: 8px;
     font-size: var(--font-size-large);

@@ -10,6 +10,9 @@ export interface UIState {
             isOpen: boolean;
             key: string;
         };
+        pool: {
+            isOpen: boolean;
+        };
         settings: {
             isOpen: boolean;
         };
@@ -36,6 +39,9 @@ const mutations = {
     setAssetModalKey: (_state: UIState, key: string): void => {
         _state.modal.asset.key= key;
     },
+    setPoolModal: (_state: UIState, isOpen: boolean): void => {
+        _state.modal.pool.isOpen = isOpen;
+    },
     setSettingsModal: (_state: UIState, isOpen: boolean): void => {
         _state.modal.settings.isOpen = isOpen;
     },
@@ -60,6 +66,12 @@ const actions = {
     },
     closeAssetModal: ({ commit }: ActionContext<UIState, RootState>): void => {
         commit('setAssetModalOpen', false);
+    },
+    openPoolModal: ({ commit }: ActionContext<UIState, RootState>): void => {
+        commit('setPoolModal', true);
+    },
+    closePoolModal: ({ commit }: ActionContext<UIState, RootState>): void => {
+        commit('setPoolModal', false);
     },
     openSettingsModal: ({ commit }: ActionContext<UIState, RootState>): void => {
         commit('setSettingsModal', true);
@@ -92,6 +104,9 @@ function state(): UIState {
             asset: {
                 isOpen: false,
                 key: '',
+            },
+            pool: {
+                isOpen: false,
             },
             settings: {
                 isOpen: false,

@@ -4,6 +4,7 @@ import store from './store';
 
 import App from './App.vue';
 
+import Pool from './pages/Pool.vue';
 import Swap from './pages/Swap.vue';
 
 const routerHistory = createWebHashHistory();
@@ -11,6 +12,7 @@ const router = createRouter({
     history: routerHistory,
     routes: [
         { path: '/', redirect: '/swap' },
+        { path: '/pool/:poolAddress?', name: 'pool', component: Pool },
         { path: '/swap/:assetIn?/:assetOut?', name: 'swap', component: Swap },
     ],
 });
