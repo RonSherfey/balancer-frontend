@@ -10,12 +10,8 @@
             </div>
         </router-link>
         <div class="nav">
-            <router-link :to="{ name: 'swap' }">
-                Swap
-            </router-link>
-            <router-link :to="{ name: 'pool' }">
-                Pool
-            </router-link>
+            <router-link :to="{ name: 'swap' }">Swap</router-link>
+            <router-link :to="{ name: 'pool' }">Pool</router-link>
         </div>
         <div class="header-right">
             <Account class="account" />

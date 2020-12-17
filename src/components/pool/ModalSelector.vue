@@ -28,17 +28,13 @@
                         {{ getPoolName(pool) }}
                     </div>
                 </div>
-                <!-- <div class="pool-amount">
-                    {{ pool.amount }}
-                </div> -->
             </div>
         </template>
     </ModalBase>
 </template>
 
 <script lang="ts">
-import { getAddress } from '@ethersproject/address';
-import { defineComponent, watch, computed, ref } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import { isAddress, getPoolName } from '@/utils/helpers';
@@ -68,26 +64,9 @@ export default defineComponent({
 
         const query = ref('');
 
-        watch(query, () => {
-            const metadata = store.state.pools.metadata;
-            if (!isAddress(query.value)) {
-                return;
-            }
-            const address = getAddress(query.value);
-            const pool = metadata[address];
-            if (!pool) {
-                console.log('pool not found');
-                // store.dispatch('assets/fetchMetadata', [address]);
-                // store.dispatch('account/fetchAssets', [address]);
-            }
-        });
-
         const pools = computed(() => {
             const metadata = store.state.pools.metadata;
             return Object.values(metadata).slice(0, 100);
-            // const ownedAssets = pools.filter(asset => asset.amount);
-            // const notOwnedAssets = pools.filter(asset => !asset.amount);
-            // return [...ownedAssets, ...notOwnedAssets];
         });
 
         const visiblePools = computed(() => {
@@ -105,12 +84,6 @@ export default defineComponent({
                     if (isAddress(queryString)) {
                         return pool.address.toLowerCase() === queryString;
                     }
-                    // if (pool.name.toLowerCase().includes(queryString)) {
-                    //     return true;
-                    // }
-                    // if (pool.symbol.toLowerCase().includes(queryString)) {
-                    //     return true;
-                    // }
                     return false;
                 });
         });

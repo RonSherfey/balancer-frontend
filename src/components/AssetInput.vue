@@ -159,6 +159,9 @@ export default defineComponent({
         }
 
         function openModal(): void {
+            if (isReadonly.value) {
+                return;
+            }
             store.dispatch('ui/openAssetModal', props.modalKey);
         }
 

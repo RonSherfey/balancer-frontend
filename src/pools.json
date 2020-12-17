@@ -31,7 +31,8 @@
 		"symbol": "WETH",
 		"name": "Wrapped Ether",
 		"denormWeight": "40"
-	}]
+	}],
+	"name": "ETH Bull Pool"
 }, {
 	"id": "0x59A19D8c652FA0284f44113D0ff9aBa70bd46fB4",
 	"swapFee": "0.0015",
@@ -48,7 +49,8 @@
 		"symbol": "WETH",
 		"name": "Wrapped Ether",
 		"denormWeight": "10"
-	}]
+	}],
+	"name": "BALler Pool"
 }, {
 	"id": "0xCce41676a4624F4A1e33a787A59d6bF96e5067bc",
 	"swapFee": "0.0001",
@@ -65,7 +67,8 @@
 		"symbol": "uUSDwETH-DEC",
 		"name": "uUSDwETH Synthetic Token Expiring 31 December 2020",
 		"denormWeight": "25"
-	}]
+	}],
+	"name": "UMA Synthetic USD Pool I"
 }, {
 	"id": "0x5B2dC8c02728e8FB6aeA03a622c3849875A48801",
 	"swapFee": "0.1",
@@ -135,7 +138,8 @@
 		"symbol": "uUSDrBTC-DEC",
 		"name": "uUSDrBTC Synthetic Token Expiring 31 December 2020",
 		"denormWeight": "25"
-	}]
+	}],
+	"name": "UMA Synthetic USD Pool II"
 }, {
 	"id": "0x7aFE74AE3C19f070c109A38C286684256ADC656C",
 	"swapFee": "0.0015",

@@ -87,6 +87,9 @@ export function getPoolName(pool: PoolMetadata): string {
     if (!pool) {
         return 'Balancer Pool';
     }
+    if (pool.name) {
+        return pool.name;
+    }
     const totalWeight = pool.totalWeight;
     return pool.assets
         .sort((a, b) => {

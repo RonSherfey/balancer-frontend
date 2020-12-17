@@ -23,9 +23,8 @@
                     :amount="assetAmountInputs[i]"
                     :label="assetBalances[i]"
                     :modal-key="''"
-                    :loading="poolLoading"
                     @change="value => {
-                        handleAmountChange(i, value);
+                        handleAssetAmountChange(i, value);
                     }"
                 />
             </div>
@@ -33,6 +32,9 @@
                 <PoolInput
                     :address="poolAddressInput"
                     :amount="poolAmountInput"
+                    @change="value => {
+                        handlePoolAmountChange(value);
+                    }"
                 />
             </div>
             <PoolButton
@@ -119,7 +121,7 @@ export default defineComponent({
 
         const assetBalances = computed(() => {
             return assets.value.map(asset => {
-                const assetIndex = assets.value.indexOf(asset);
+                // const assetIndex = assets.value.indexOf(asset);
                 const { balances } = store.state.account;
                 const metadata = store.getters['assets/metadata'];
                 if (!balances || !metadata) {
@@ -142,9 +144,10 @@ export default defineComponent({
                 const assetDecimals = assetMetadata.decimals;
                 const balanceShortNumber = scale(balanceNumber, -assetDecimals);
                 const text = `Balance: ${balanceShortNumber.toFixed(config.precision)}`;
-                const amount = assetAmountInputs[assetIndex]
-                    ? assetAmountInputs[assetIndex].value
-                    : '';
+                // const amount = assetAmountInputs.value[assetIndex];
+                //     ? assetAmountInputs.value[assetIndex]
+                //     : '';
+                const amount = '';
                 const error = validateNumberInput(amount);
                 const style = error == ValidationError.NONE && balanceShortNumber.lt(amount)
                     ? LabelStyle.Error
@@ -181,12 +184,15 @@ export default defineComponent({
                 const assetBalance = balances[asset.address];
                 const assetMetadata = metadata[asset.address];
                 if (!assetMetadata) {
+                    console.log('validation: no meta', asset.address);
                     return PoolValidation.INSUFFICIENT_BALANCE;
                 }
                 const assetDecimals = assetMetadata.decimals;
-                const assetAmountRaw = new BigNumber(assets.value.indexOf(asset));
-                const assetAmount = scale(assetAmountRaw, assetDecimals);
-                if (!assetBalance || assetAmount.gt(assetBalance)) {
+                const assetAmountRaw = assetAmountInputs.value[assets.value.indexOf(asset)];
+                const assetAmountRawNumber = new BigNumber(assetAmountRaw);
+                const assetAmountNumber = scale(assetAmountRawNumber, assetDecimals);
+                console.log('validation', assetBalance, assetAmountNumber.toString(), assetAmountNumber.gt(assetBalance));
+                if (!assetBalance || assetAmountNumber.gt(assetBalance)) {
                     return PoolValidation.INSUFFICIENT_BALANCE;
                 }
             }
@@ -199,6 +205,7 @@ export default defineComponent({
             const poolAddress = getInitialPool();
             poolAddressInput.value = poolAddress;
             assetAmountInputs.value = pool.value.assets.map(() => '');
+            store.dispatch('pools/fetchBalances', poolAddress);
         });
 
         useIntervalFn(async () => {
@@ -206,20 +213,58 @@ export default defineComponent({
             store.dispatch('account/fetchAssets', assets);
         }, 5 * 60 * 1000);
 
-        // watch(assetInAddressInput, () => {
-        //     Storage.saveInputAsset(config.chainId, assetInAddressInput.value);
-        // });
+        function handleAssetAmountChange(index: number, amount: string): void {
+            console.log('handleAssetAmountChange', index, amount);
+            // update asset amounts
+            const decimals = assets.value[index].decimals;
+            const balance = assets.value[index].balance;
+            const balanceNumber = new BigNumber(balance);
+            const amountNumber = new BigNumber(amount);
+            const amountRawNumber = scale(amountNumber, decimals);
+            const ratio = amountRawNumber.div(balanceNumber);
+            for (let i = 0; i < assets.value.length; i++) {
+                if (i == index) {
+                    continue;
+                }
+                const decimals = assets.value[i].decimals;
+                const balance = assets.value[i].balance;
+                const balanceNumber = new BigNumber(balance);
+                const amountRaw = balanceNumber.times(ratio);
+                const amount = scale(amountRaw, -decimals);
+                console.log(i, amount.toString());
+                assetAmountInputs.value[i] = amount.toString();
+            }
+            // update pool amount
+            const totalSupply = pool.value.totalSupply;
+            const totalSupplyNumber = new BigNumber(totalSupply);
+            const poolAmountRaw = totalSupplyNumber.times(ratio);
+            const poolAmount = scale(poolAmountRaw, -18);
+            poolAmountInput.value = poolAmount.toString();
+        }
 
-        // watch(assetOutAddressInput, async () => {
-        //     Storage.saveOutputAsset(config.chainId, assetOutAddressInput.value);
-        // });
-
-        function handleAmountChange(amount: string): void {
+        function handlePoolAmountChange(amount: string): void {
+            console.log('handlePoolAmountChange', amount);
+            // update asset amounts
+            const totalSupply = pool.value.totalSupply;
+            const totalSupplyNumber = new BigNumber(totalSupply);
+            const amountNumber = new BigNumber(amount);
+            const amountRawNumber = scale(amountNumber, 18);
+            const ratio = amountRawNumber.div(totalSupplyNumber);
+            for (let i = 0; i < assets.value.length; i++) {
+                const decimals = assets.value[i].decimals;
+                const balance = assets.value[i].balance;
+                const balanceNumber = new BigNumber(balance);
+                const amountRaw = balanceNumber.times(ratio);
+                const amount = scale(amountRaw, -decimals);
+                console.log(i, amount.toString());
+                assetAmountInputs.value[i] = amount.toString();
+            }
         }
 
         function handlePoolSelect(poolAddress: string): void {
             poolAddressInput.value = poolAddress;
             assetAmountInputs.value = pool.value.assets.map(() => '');
+            store.dispatch('pools/fetchBalances', poolAddress);
         }
 
         function unlock(): void {
@@ -229,19 +274,6 @@ export default defineComponent({
         function invest(): void {
 
         }
-
-        // async function unlock(): Promise<void> {
-        //     transactionPending.value = true;
-        //     const provider = await store.getters['account/provider'];
-        //     const assetInAddress = assetInAddressInput.value;
-        //     const spender = config.addresses.exchangeProxy;
-        //     const tx = await Helper.unlock(provider, assetInAddress, spender);
-        //     const metadata = store.getters['assets/metadata'];
-        //     const assetSymbol = metadata[assetInAddress].symbol;
-        //     const text = `Unlock ${assetSymbol}`;
-        //     await handleTransaction(tx, text);
-        //     store.dispatch('account/fetchAssets', [ assetInAddress ]);
-        // }
 
         // async function handleTransaction(transaction: any, text: string): Promise<void> {
         //     if (transaction.code) {
@@ -316,7 +348,8 @@ export default defineComponent({
             isPoolModalOpen,
             isAssetModalOpen,
 
-            handleAmountChange,
+            handleAssetAmountChange,
+            handlePoolAmountChange,
             handlePoolSelect,
             unlock,
             invest,
@@ -358,7 +391,7 @@ export default defineComponent({
 }
 
 .pool-input {
-    margin-top: 16px;
+    margin-top: 8px;
 }
 
 .validation-message {

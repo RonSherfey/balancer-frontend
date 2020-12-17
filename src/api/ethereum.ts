@@ -6,6 +6,7 @@ import erc20Abi from '../abi/ERC20.json';
 import config, { AssetMetadata } from '@/config';
 import { ETH_KEY, getTrustwalletLink } from '@/utils/helpers';
 import provider from '@/utils/provider';
+import { PoolMetadata } from '@/store/modules/pools';
 
 export type Allowances = Record<string, Record<string, string>>;
 
@@ -88,6 +89,47 @@ export default class Ethereum {
                 symbol,
                 decimals,
                 logoURI: getTrustwalletLink(assetAddress),
+            };
+        }
+        return metadata;
+    }
+
+    static async fetchPoolBalances(pools: PoolMetadata[]): Promise<Record<string, PoolMetadata>> {
+        console.log('[api/ethereum] fetchPoolBalances', pools);
+        const ethcallProvider = new Provider();
+        await ethcallProvider.init(provider);
+        const calls = [];
+        // Fetch asset metadata
+        for (const pool of pools) {
+            const poolContract = new Contract(pool.address, erc20Abi);
+            const totalSupplyCall = poolContract.totalSupply();
+            calls.push(totalSupplyCall);
+            for (const asset of pool.assets) {
+                const assetContract = new Contract(asset.address, erc20Abi);
+                const assetBalanceCall = assetContract.balanceOf(pool.address);
+                calls.push(assetBalanceCall);
+            }
+        }
+        // Fetch data
+        const data = await ethcallProvider.all(calls);
+        const metadata: Record<string, PoolMetadata> = {};
+        let i = 0;
+        for (const pool of pools) {
+            const totalSupply = data[i].toString();
+            i++;
+            const assets = pool.assets.map(asset => {
+                const index = i + pool.assets.indexOf(asset);
+                const balance = data[index].toString();
+                return {
+                    ...asset,
+                    balance,
+                };
+            });
+            i += pool.assets.length;
+            metadata[pool.address] = {
+                ...pool,
+                assets,
+                totalSupply,
             };
         }
         return metadata;
