@@ -33,8 +33,6 @@
     "dotenv-webpack": "^2.0.0",
     "ethcall": "^3.0.0",
     "fortmatic": "^2.0.6",
-    "vue": "^3.0.2",
-    "vue-router": "^4.0.5",
     "vuex": "^4.0.0-rc.2",
     "walletlink": "^2.0.2"
   },
